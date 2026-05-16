@@ -21,5 +21,5 @@ You can view the live application here: https://soundguard.up.railway.app/
 * **Backend:** Node.js & Express.js (Robust REST API architecture)
 * **Database:** MongoDB with 2dsphere indexing (enabling ultra-fast spatial queries)
 * **Frontend:** Handlebars.js (Server-Side Rendering) & Materialize CSS
-* **Security:** Environment variables (.env) securely managed on the server, keeping API keys and email credentials hidden from the client side.
+* **Security:** Environment variables (.env) securely managed on the server.
 * **Hosting:** Deployed and live on Railway.
