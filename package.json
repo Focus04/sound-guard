@@ -1,0 +1,19 @@
+{
+  "name": "sound-guard",
+  "version": "1.0.0",
+  "description": "Web service for collecting and monitoring alerts from all devices.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-handlebars": "^9.0.1",
+    "mongoose": "^9.5.0"
+  }
+}

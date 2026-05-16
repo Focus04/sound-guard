@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="icon" type="image/png" href="/icon/icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    
+    <style>
+      body {
+        background-color: #F8F9FA;
+        font-family: 'Roboto', Arial, sans-serif;
+        color: #202124;
+      }
+      
+      nav {
+        background-color: #FFFFFF !important;
+        box-shadow: none !important;
+        border-bottom: 1px solid #DADCE0;
+      }
+  
+      nav .brand-logo {
+        color: #5F6368 !important;
+        font-size: 1.4rem;
+        font-weight: 500;
+        display: flex !important;
+        align-items: center !important;
+        height: 100%;
+        white-space: nowrap;
+      }
+
+      nav .brand-logo i {
+        color: #1A73E8 !important;
+        margin-right: 12px;
+        font-size: 1.8rem;
+      }
+
+      .custom-logo {
+        height: 50px !important;
+        width: auto;
+        margin-right: 10px;
+        object-fit: contain;
+        vertical-align: middle;
+      }
+
+      h4 {
+        font-weight: 500;
+        font-size: 1.3rem;
+        color: #202124 !important;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+      }
+
+      .card {
+        border-radius: 16px !important;
+        box-shadow: 0 1px 2px 0 rgba(60,64,67,0.3), 0 1px 3px 1px rgba(60,64,67,0.15) !important;
+        border: none;
+      }
+
+      #map {
+        border-radius: 24px !important;
+        border: 1px solid #DADCE0;
+        box-shadow: none !important;
+        overflow: hidden;
+      }
+
+      .badge.new {
+        border-radius: 100px !important;
+        font-weight: 500;
+        padding: 0 12px !important;
+        height: 22px;
+        line-height: 22px;
+      }
+
+      .card-panel {
+        border-radius: 12px !important;
+        background-color: #E8F0FE !important;
+        color: #1A73E8 !important;
+        box-shadow: none !important;
+        display: flex;
+        align-items: center;
+      }
+
+      @media only screen and (min-width: 993px) {
+          nav .nav-wrapper {
+              max-width: 1280px;
+              margin: 0 auto;
+              width: 90%;
+              position: relative;
+          }
+          nav .brand-logo {
+              position: absolute !important;
+              left: 0 !important;
+          }
+      }
+
+      @media only screen and (max-width: 992px) {
+          nav .nav-wrapper {
+              display: flex !important;
+              justify-content: center !important;
+              align-items: center !important;
+              height: 100% !important;
+              width: 100% !important;
+          }
+
+          nav .brand-logo {
+              position: static !important;
+              transform: none !important;
+              left: auto !important;
+              margin: 0 !important;
+          }
+          
+          nav .brand-logo i {
+              margin-top: 30px !important;
+          }
+      }
+    </style>
+</head>
+<body>
+  <nav>
+      <div class="nav-wrapper">
+          <a href="/" class="brand-logo">
+            <img src="/icon/icon.png" alt="Logo" class="custom-logo"> 
+            SoundGuard
+          </a>
+      </div>
+  </nav>
+
+  <div class="container" style="margin-top: 1rem;">
+      {{{body}}}
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>

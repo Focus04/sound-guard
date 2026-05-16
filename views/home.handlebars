@@ -1,0 +1,137 @@
+<h4>Live Alert Map</h4>
+<div id="map" style="height: 500px; width: 100%; margin-bottom: 2rem;"></div>
+
+<h4>Latest Registered Alerts</h4>
+<div class="row">
+  {{#if alerts}}
+    {{#each alerts}}
+      <div class="col s12 m6">
+          <div class="card hoverable" style="overflow: hidden;"> 
+              <div class="card-content">
+                  <span class="card-title" style="font-size: 1.2rem; font-weight: 500; display: flex; align-items: center; color: #202124;">
+                      <i class="material-icons-outlined" style="color: #EA4335; margin-right: 8px;">warning</i>
+                      {{this.displayType}}
+                      <span
+                        class="new badge red"
+                        data-badge-caption="{{#if (eq this.reportCount 1)}}report{{else}}reports{{/if}}">
+                        {{this.reportCount}}
+                      </span>
+                  </span>
+                  <p style="margin-top: 12px; color: #5F6368;"><strong>Severity:</strong> {{this.severity}}</p>
+                  <p style="color: #5F6368;"><strong>Location:</strong> {{this.location.coordinates.[1]}}, {{this.location.coordinates.[0]}}</p>
+              </div>
+              <div class="card-action" style="border-top: 1px solid #DADCE0; color: #80868B; display: flex; align-items: center; font-size: 0.9rem;">
+                  <i class="material-icons-outlined" style="font-size: 1.2rem; margin-right: 6px;">schedule</i> {{this.date}}
+              </div>
+          </div>
+      </div>
+    {{/each}}
+  {{else}}
+      <div class="col s12">
+          <div class="card-panel">
+              <i class="material-icons-outlined" style="margin-right: 12px;">info</i>
+              <span>There are no alerts registered at the moment. The area is secure.</span>
+          </div>
+      </div>
+  {{/if}}
+</div>
+
+<script>
+  function initMap() {
+    const centerLocation = { lat: 44.4268, lng: 26.1025 };
+    const map = new google.maps.Map(document.getElementById("map"), {
+      zoom: 13,
+      center: centerLocation,
+      mapTypeControl: false,
+      streetViewControl: false,
+      styles: [
+        {
+          featureType: "poi",
+          elementType: "labels",
+          stylers: [{ visibility: "off" }]
+        }
+      ]
+    });
+
+    const alerts = {{{json alerts}}};
+
+    // 1. GROUP ALERTS BY EXACT LOCATION
+    const groupedLocations = {};
+    const severityValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4 };
+
+    alerts.forEach(alert => {
+      const lat = alert.location.coordinates[1];
+      const lng = alert.location.coordinates[0];
+      
+      // Use coordinates as a unique key
+      const locationKey = `${lat},${lng}`; 
+
+      if (!groupedLocations[locationKey]) {
+        groupedLocations[locationKey] = {
+          lat: lat,
+          lng: lng,
+          totalReports: 0,
+          types: new Set(),
+          highestSeverity: 'LOW'
+        };
+      }
+
+      // Add up all reports for this spot
+      groupedLocations[locationKey].totalReports += alert.reportCount;
+      
+      groupedLocations[locationKey].types.add(alert.displayType);
+
+      // Track the highest severity for color coding
+      const currentSeverityVal = severityValues[groupedLocations[locationKey].highestSeverity];
+      const newSeverityVal = severityValues[alert.severity || 'LOW'];
+      
+      if (newSeverityVal > currentSeverityVal) {
+          groupedLocations[locationKey].highestSeverity = alert.severity;
+      }
+    });
+
+    // 2. DRAW ONE COMBINED CIRCLE PER LOCATION
+    Object.values(groupedLocations).forEach(cluster => {
+      const baseRadius = 50; 
+      // Size the circle based on TOTAL reports combined
+      const calculatedRadius = Math.sqrt(cluster.totalReports) * baseRadius;
+
+      // Color logic based on the HIGHEST severity in this group
+      let alertColor = "#EA4335"; // Google Red (Default for HIGH/CRITICAL)
+      if (cluster.highestSeverity === 'LOW') alertColor = "#34A853"; 
+      else if (cluster.highestSeverity === 'MEDIUM') alertColor = "#FBBC05"; 
+
+      const alertCircle = new google.maps.Circle({
+        strokeColor: alertColor,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: alertColor,
+        fillOpacity: 0.35,
+        map,
+        center: { lat: cluster.lat, lng: cluster.lng },
+        radius: calculatedRadius,
+      });
+
+      // Format the list of alerts for the popup
+      const alertTypesString = Array.from(cluster.types).join('<br> • ');
+
+      const infoWindow = new google.maps.InfoWindow({
+        content: `<div style="font-family: Roboto, sans-serif; color: #202124;">
+                    <strong style="font-size:1.1rem; color: ${alertColor}">Location Summary</strong><br>
+                    <span style="color:#5F6368; font-size: 0.9rem;">Total Reports: <strong>${cluster.totalReports}</strong></span><br>
+                    <hr style="border: 0; border-top: 1px solid #DADCE0; margin: 8px 0;">
+                    <span style="color:#5F6368; font-size: 0.9rem;">
+                      • ${alertTypesString}
+                    </span>
+                  </div>`,
+      });
+
+      alertCircle.addListener("click", () => {
+        infoWindow.setPosition(alertCircle.getCenter());
+        infoWindow.open(map);
+      });
+    });
+  }
+</script>
+
+<script async src="https://maps.googleapis.com/maps/api/js?key={{googleMapsApiKey}}&loading=async&callback=initMap"></script>
