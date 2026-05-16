@@ -55,7 +55,6 @@
 
     const alerts = {{{json alerts}}};
 
-    // 1. GROUP ALERTS BY EXACT LOCATION
     const groupedLocations = {};
     const severityValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4 };
 
@@ -63,7 +62,6 @@
       const lat = alert.location.coordinates[1];
       const lng = alert.location.coordinates[0];
       
-      // Use coordinates as a unique key
       const locationKey = `${lat},${lng}`; 
 
       if (!groupedLocations[locationKey]) {
@@ -76,12 +74,10 @@
         };
       }
 
-      // Add up all reports for this spot
       groupedLocations[locationKey].totalReports += alert.reportCount;
       
       groupedLocations[locationKey].types.add(alert.displayType);
 
-      // Track the highest severity for color coding
       const currentSeverityVal = severityValues[groupedLocations[locationKey].highestSeverity];
       const newSeverityVal = severityValues[alert.severity || 'LOW'];
       
@@ -90,14 +86,11 @@
       }
     });
 
-    // 2. DRAW ONE COMBINED CIRCLE PER LOCATION
     Object.values(groupedLocations).forEach(cluster => {
       const baseRadius = 50; 
-      // Size the circle based on TOTAL reports combined
       const calculatedRadius = Math.sqrt(cluster.totalReports) * baseRadius;
 
-      // Color logic based on the HIGHEST severity in this group
-      let alertColor = "#EA4335"; // Google Red (Default for HIGH/CRITICAL)
+      let alertColor = "#EA4335";
       if (cluster.highestSeverity === 'LOW') alertColor = "#34A853"; 
       else if (cluster.highestSeverity === 'MEDIUM') alertColor = "#FBBC05"; 
 
@@ -112,7 +105,6 @@
         radius: calculatedRadius,
       });
 
-      // Format the list of alerts for the popup
       const alertTypesString = Array.from(cluster.types).join('<br> • ');
 
       const infoWindow = new google.maps.InfoWindow({
