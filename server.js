@@ -3,8 +3,13 @@ import mongoose from 'mongoose';
 import { engine } from 'express-handlebars';
 import cors from 'cors';
 import Alert from './models/Alert.js';
-import { config } from 'dotenv'
+import { config } from 'dotenv';
 
+import alertsRoutes from './routes/alertsRoutes.js';
+import checkLocationRoutes from './routes/checkLocationRoutes.js';
+
+config({ quiet: true });
+mongoose.connect(process.env.MONGODB_URI);
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -13,98 +18,16 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.engine('handlebars', engine({
+  extname: '.hbs',
   helpers: {
     json: context => JSON.stringify(context),
     eq: (v1, v2) => v1 === v2
   }
 }));
-app.set('view engine', 'handlebars');
+app.set('view engine', 'hbs');
 app.set('views', './views');
-
-config({ quiet: true });
-mongoose.connect(process.env.MONGODB_URI);
-
-app.post('/api/alerts', async (req, res) => {
-  const { alertType, severity, location, timestamp } = req.body;
-
-  if (!location || !location.lat || !location.lng) {
-    return res.status(400).json({ error: 'Coordinates are required' });
-  }
-
-  const alertTime = timestamp ? new Date(timestamp) : new Date();
-  const timeWindow = new Date(alertTime.getTime() - 15 * 60000);
-
-  const existingAlert = await Alert.findOne({
-    alertType: alertType,
-    timestamp: { $gte: timeWindow },
-    location: {
-      $nearSphere: {
-        $geometry: {
-          type: "Point",
-          coordinates: [location.lng, location.lat]
-        },
-        $maxDistance: 200
-      }
-    }
-  });
-
-  if (existingAlert) {
-    existingAlert.reportCount += 1;
-
-    await existingAlert.save();
-    return res.status(200).json({
-      message: 'Alert grouped with an existing nearby event.',
-      alert: existingAlert
-    });
-  }
-
-  const newAlert = new Alert({
-    reportCount: 1,
-    alertType,
-    severity,
-    location: {
-      type: 'Point',
-      coordinates: [location.lng, location.lat]
-    },
-    timestamp: alertTime
-  });
-
-  await newAlert.save();
-  res.status(201).json({
-    message: 'New localized alert registered successfully!',
-    alert: newAlert
-  });
-});
-
-app.post('/api/check-location', async (req, res) => {
-  const { deviceId, location } = req.body;
-  const hoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
-
-  const nearbyAlerts = await Alert.find({
-    timestamp: { $gte: hoursAgo },
-    location: {
-      $nearSphere: {
-        $geometry: {
-          type: "Point",
-          coordinates: [location.lng, location.lat]
-        },
-        $maxDistance: 200
-      }
-    }
-  });
-
-  const isDangerous = nearbyAlerts.length > 0;
-
-  let totalReports = 0;
-  nearbyAlerts.forEach(alert => {
-    totalReports += alert.reportCount;
-  });
-
-  res.status(200).json({
-    isDangerous: isDangerous,
-    nearbyAlertsCount: nearbyAlerts.length,
-  });
-});
+app.use('/api/alerts', alertsRoutes);
+app.use('/api/check-location', checkLocationRoutes);
 
 app.get('/', async (req, res) => {
   const alerts = await Alert.find().sort({ timestamp: -1 }).limit(20).lean();
@@ -127,6 +50,4 @@ app.get('/', async (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server started.`);
-});
+app.listen(PORT, () => console.log(`Server started.`));
