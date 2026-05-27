@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-app.engine('handlebars', engine({
+app.engine('hbs', engine({
   extname: '.hbs',
   helpers: {
     json: context => JSON.stringify(context),
