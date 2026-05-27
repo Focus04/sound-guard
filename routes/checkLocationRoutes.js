@@ -28,11 +28,10 @@ router.post('/', async (req, res) => {
     totalReports += alert.reportCount;
   });
 
-  // res.status(200).json({
-  //   isDangerous: isDangerous,
-  //   nearbyAlertsCount: nearbyAlerts.length,
-  // });
-  res.send('Hello world!')
+  res.status(200).json({
+    isDangerous: isDangerous,
+    nearbyAlertsCount: nearbyAlerts.length,
+  });
 });
 
 export default router;
