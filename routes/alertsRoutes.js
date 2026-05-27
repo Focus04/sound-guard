@@ -50,10 +50,11 @@ router.post('/', async (req, res) => {
   });
 
   await newAlert.save();
-  res.status(201).json({
-    message: 'New localized alert registered successfully!',
-    alert: newAlert
-  });
+  // res.status(201).json({
+  //   message: 'New localized alert registered successfully!',
+  //   alert: newAlert
+  // });
+  res.send('Hello world')
 });
 
 export default router;
