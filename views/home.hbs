@@ -59,15 +59,16 @@
     const severityValues = { 'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4 };
 
     alerts.forEach(alert => {
-      const lat = alert.location.coordinates[1];
-      const lng = alert.location.coordinates[0];
-      
-      const locationKey = `${lat},${lng}`; 
+      const exactLat = alert.location.coordinates[1];
+      const exactLng = alert.location.coordinates[0];
+      const gridLat = exactLat.toFixed(3);
+      const gridLng = exactLng.toFixed(3);
+      const locationKey = `${gridLat},${gridLng}`;
 
       if (!groupedLocations[locationKey]) {
         groupedLocations[locationKey] = {
-          lat: lat,
-          lng: lng,
+          lat: exactLat,
+          lng: exactLng,
           totalReports: 0,
           types: new Set(),
           highestSeverity: 'LOW'
@@ -75,15 +76,13 @@
       }
 
       groupedLocations[locationKey].totalReports += alert.reportCount;
-      
+
       groupedLocations[locationKey].types.add(alert.displayType);
 
       const currentSeverityVal = severityValues[groupedLocations[locationKey].highestSeverity];
       const newSeverityVal = severityValues[alert.severity || 'LOW'];
-      
-      if (newSeverityVal > currentSeverityVal) {
-          groupedLocations[locationKey].highestSeverity = alert.severity;
-      }
+
+      if (newSeverityVal > currentSeverityVal) groupedLocations[locationKey].highestSeverity = alert.severity;
     });
 
     Object.values(groupedLocations).forEach(cluster => {
